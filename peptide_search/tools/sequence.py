@@ -1,7 +1,7 @@
 import heapq
 import numpy as np
 import numpy.typing as npt
-from typing import Iterator, List
+from typing import Iterator, List, Tuple
 
 
 def is_valid_sequence(sequence: List[str] | str) -> bool:
@@ -24,10 +24,11 @@ def is_valid_sequence(sequence: List[str] | str) -> bool:
 
 
 def greedy_pssm_generator(pssm: npt.NDArray,
-                          aminoacids: List[str]) -> Iterator[str]:
+                          aminoacids: List[str],
+                          descending: bool = True) -> Iterator[str]:
     """
     Generates amino acid sequences for the sensor, indexed from -5 to 4 in
-    descending score order.
+    score order.
 
     Parameters
     ----------
@@ -36,6 +37,8 @@ def greedy_pssm_generator(pssm: npt.NDArray,
         array corresponds to the position it would occupy in the kinase.
     aminoacids : list of str
         the order of the aminoacids, corresponding to every row in `pssm`
+    descending: bool, default True
+        if set to true, the greddy direction is ascending for the score.
 
     Returns
     -------
@@ -56,7 +59,9 @@ def greedy_pssm_generator(pssm: npt.NDArray,
     r_size, c_size = pssm.shape
 
     # sort sequences per position
-    greedy_sort = np.flip(pssm.argsort(axis=0), axis=0)
+    greedy_sort = pssm.argsort(axis=0)
+    if descending:
+        greedy_sort = np.flip(pssm.argsort(axis=0), axis=0)
     cols = list(range(c_size))
     initial_indices = [0] * c_size  # start with the maximum possible score
     pssm_indices = greedy_sort[initial_indices, cols]
@@ -64,7 +69,9 @@ def greedy_pssm_generator(pssm: npt.NDArray,
     init_seq = [aminoacids[i] for i in pssm_indices]
     init_seq[5] = "S"
     init_score = np.log2(np.prod(init_vals))
-    init_state = (-init_score, tuple(init_seq), tuple(initial_indices))
+    if descending:
+        init_score = -init_score
+    init_state = (init_score, tuple(init_seq), tuple(initial_indices))
 
     pq = [init_state]
     visited = set([tuple(pssm_indices)])
@@ -87,16 +94,26 @@ def greedy_pssm_generator(pssm: npt.NDArray,
                     new_seq = [aminoacids[i] for i in pssm_indices]
                     new_seq[5] = "S"
                     new_score = np.log2(np.prod(new_vals))
-                    heapq.heappush(pq, (-new_score,
+                    if descending:
+                        new_score = -new_score
+                    heapq.heappush(pq, (new_score,
                                         tuple(new_seq),
                                         tuple(new_indices)))
 
 
 def get_sequence_score(pssm: npt.NDArray,
                        aminoacids: List[str] | str,
-                       sequence: List[str] | str):
+                       sequence: List[str] | str) -> float:
     indices = []
     for c in sequence:
         indices.append(aminoacids.tolist().index(c))
     vals = pssm[indices, list(range(pssm.shape[1]))]
     return np.log2(np.prod(vals))
+
+
+def get_pssm_range(pssm: npt.NDArray,
+                   aminoacids: List[str] | str) -> Tuple[float]:
+    max_seq = next(greedy_pssm_generator(pssm, aminoacids))
+    min_seq = next(greedy_pssm_generator(pssm, aminoacids, descending=False))
+    return (get_sequence_score(pssm, aminoacids, max_seq),
+            get_sequence_score(pssm, aminoacids, min_seq))
