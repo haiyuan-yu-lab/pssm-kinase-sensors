@@ -79,7 +79,7 @@ def greedy_pssm_generator(pssm: npt.NDArray,
     while pq:
         score, seq, indices = heapq.heappop(pq)
         if is_valid_sequence(seq):
-            yield seq
+            yield "".join(seq)
         for col in cols:
             if col == 5:
                 continue
