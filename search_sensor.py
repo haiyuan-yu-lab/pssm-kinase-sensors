@@ -4,7 +4,6 @@ from peptide_search.tools.sequence import (greedy_pssm_generator,
                                            get_sequence_score,
                                            get_pssm_range)
 from peptide_search.io.readers import read_pssm_file
-import numpy as np
 from rich.progress import track
 
 
@@ -124,7 +123,7 @@ if __name__ == "__main__":
                         help="Maximum number of sequences to generate before"
                              " forcifully stopping the script.")
     parser.add_argument("-o", "--output-file", required=True,
-                        help="Path to the output directory")
+                        help="Path to the output file")
     args = parser.parse_args()
     run(Path(args.kinases_directory),
         args.kinases,
