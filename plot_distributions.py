@@ -126,7 +126,7 @@ def run(kinases_directory: Path,
     ax.set_ylabel("Score")
     ax.legend(handles=legend_elements,
               loc=(1.01, 0.5))
-    fig.suptitle(target_kinase)
+    fig.suptitle(f"{target_kinase} vs {' '.join(kinases)}")
     plt.savefig(output_file, bbox_inches="tight")
     plt.close("all")
 

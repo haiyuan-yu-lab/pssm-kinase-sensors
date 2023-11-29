@@ -125,6 +125,7 @@ if __name__ == "__main__":
     parser.add_argument("-o", "--output-file", required=True,
                         help="Path to the output file")
     args = parser.parse_args()
+
     run(Path(args.kinases_directory),
         args.kinases,
         args.target,
