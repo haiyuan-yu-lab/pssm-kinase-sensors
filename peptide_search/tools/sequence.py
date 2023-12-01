@@ -13,6 +13,8 @@ def is_valid_sequence(sequence: List[str] | str) -> bool:
         - If a K/R appears in a negative position, it won't appear on a
           positive position, and vice-versa
     """
+    if "C" in sequence:
+        return False
     if len(sequence) != 10 or sequence[5] != "S" or "K" in sequence[4:7]:
         return False
     first_half = sequence[:5]
@@ -115,5 +117,5 @@ def get_pssm_range(pssm: npt.NDArray,
                    aminoacids: List[str] | str) -> Tuple[float]:
     max_seq = next(greedy_pssm_generator(pssm, aminoacids))
     min_seq = next(greedy_pssm_generator(pssm, aminoacids, descending=False))
-    return (get_sequence_score(pssm, aminoacids, max_seq),
-            get_sequence_score(pssm, aminoacids, min_seq))
+    return (get_sequence_score(pssm, aminoacids, min_seq),
+            get_sequence_score(pssm, aminoacids, max_seq))

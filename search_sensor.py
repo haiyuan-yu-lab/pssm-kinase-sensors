@@ -79,14 +79,14 @@ def run(kinases_directory: Path,
             st_scores_min = min(s for s in st_scores.values())
 
             if score - st_scores_max < st_distance:
-                print("not valid")
+                print("sequence outside configured distance")
 
             bg_scores = get_score_distribution(background, seq)
             bg_scores_max = max(s for s in bg_scores.values())
             bg_scores_min = min(s for s in bg_scores.values())
 
             if score - bg_scores_max < bg_distance:
-                print("not valid (BG)")
+                print("sequence outside configured distance (background)")
 
             subtarget_string = "|".join(f"{k}:{s}"
                                         for k, s in st_scores.items())
